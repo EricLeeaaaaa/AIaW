@@ -73,7 +73,10 @@
         >
           {{ $t('settingsView.defaultModelHeader') }}
         </q-item-label>
-        <model-input-items v-model="perfs.model" />
+        <model-input-items
+          v-model="perfs.model"
+          :model-options-source="perfs.commonModelOptions"
+        />
         <q-item>
           <q-item-section>
             <q-item-label>
@@ -110,8 +113,10 @@
         >
           {{ $t('settingsView.systemAssistantHeader') }}
         </q-item-label>
-        <provider-input-items v-model="perfs.systemProvider" />
-        <model-input-items v-model="perfs.systemModel" />
+        <model-input-items
+          v-model="perfs.systemModel"
+          :model-options-source="perfs.commonModelOptions"
+        />
         <q-item-label
           caption
           p="x-4 y-2"

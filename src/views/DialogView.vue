@@ -1143,7 +1143,7 @@ watch(lockingBottom, val => {
 const activePlugins = computed<Plugin[]>(() => pluginsStore.plugins.filter(p => p.available && assistant.value.plugins[p.id]?.enabled))
 const usage = computed(() => messageMap.value[chain.value.at(-2)]?.usage)
 
-const systemSdkModel = computed(() => getSdkModel(perfs.systemProvider, perfs.systemModel))
+const systemSdkModel = computed(() => getSdkModel(perfs.provider, perfs.systemModel))
 function getDialogContents() {
   return chain.value.slice(1, -1).map(id => messageMap.value[id].contents).flat()
 }

@@ -2,13 +2,13 @@ import { MaybeRef, ref, unref } from 'vue'
 
 export function useFilterOptions(options: MaybeRef<string[]>) {
   const filteredOptions = ref([])
-  function filterFn(val, update, abort) {
-    if (!val) {
-      abort()
-      return
-    }
+  function filterFn(val, update) {
     update(() => {
-      filteredOptions.value = unref(options).filter(v => v.toLowerCase().includes(val.toLowerCase()))
+      if (!val) {
+        filteredOptions.value = unref(options)
+      } else {
+        filteredOptions.value = unref(options).filter(v => v.toLowerCase().includes(val.toLowerCase()))
+      }
     })
   }
   return {

@@ -178,7 +178,7 @@ export default {
     pageSuffix: 'Page',
     defaultModelHeader: 'Default Model',
     systemAssistantHeader: 'System Assistant',
-    systemAssistantCaption: 'Used to summarize conversation titles and extract Artifacts. If left blank, the default provider settings will be used.',
+    systemAssistantCaption: 'Used to summarize conversation titles and extract Artifacts.',
     featureHeader: 'Features',
     operationHeader: 'Operations',
     autoSummarizeTitle: 'Automatically Summarize Conversation Title',

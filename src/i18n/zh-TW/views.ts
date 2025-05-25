@@ -178,7 +178,7 @@ export default {
     pageSuffix: '頁面',
     defaultModelHeader: '預設模型',
     systemAssistantHeader: '系統助手',
-    systemAssistantCaption: '用於總結對話標題、提取 Artifacts。如果留空，則使用預設服務商設定',
+    systemAssistantCaption: '用於總結對話標題、提取 Artifacts。',
     featureHeader: '功能',
     operationHeader: '操作',
     autoSummarizeTitle: '自動總結對話標題',

@@ -54,6 +54,27 @@ const ProviderTypes: ProviderType[] = [
     }
   },
   {
+    name: 'openai-compatible',
+    label: t('values.openaiCompatible'),
+    avatar: { type: 'svg', name: 'openai' },
+    settings: Object({
+      ...commonSettings,
+      baseURL: String({ title: t('values.apiAddress'), description: t('values.required') })
+    }),
+    initialSettings: {},
+    constructor: createOpenAICompatible,
+    getModelList: async (settings) => {
+      const baseURL = settings.baseURL
+      const resp = await fetch(`${baseURL}/models`, {
+        headers: settings.apiKey ? {
+          Authorization: `Bearer ${settings.apiKey}`
+        } : {}
+      })
+      const { data } = await resp.json()
+      return data.map(m => m.id)
+    }
+  },
+  {
     name: 'azure',
     label: 'Azure',
     avatar: { type: 'svg', name: 'microsoft-c' },
@@ -97,27 +118,6 @@ const ProviderTypes: ProviderType[] = [
     }),
     initialSettings: {},
     constructor: createGoogleGenerativeAI
-  },
-  {
-    name: 'openai-compatible',
-    label: t('values.openaiCompatible'),
-    avatar: { type: 'svg', name: 'openai' },
-    settings: Object({
-      ...commonSettings,
-      baseURL: String({ title: t('values.apiAddress'), description: t('values.required') })
-    }),
-    initialSettings: {},
-    constructor: createOpenAICompatible,
-    getModelList: async (settings) => {
-      const baseURL = settings.baseURL
-      const resp = await fetch(`${baseURL}/models`, {
-        headers: settings.apiKey ? {
-          Authorization: `Bearer ${settings.apiKey}`
-        } : {}
-      })
-      const { data } = await resp.json()
-      return data.map(m => m.id)
-    }
   },
   {
     name: 'openrouter',

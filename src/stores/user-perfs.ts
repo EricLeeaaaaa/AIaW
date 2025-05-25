@@ -11,7 +11,6 @@ interface Perfs {
   themeHue: number
   provider: Provider
   model: Model
-  systemProvider: Provider
   systemModel: Model
   userAvatar: Avatar
   commonModelOptions: string[]
@@ -55,9 +54,8 @@ export const useUserPerfsStore = defineStore('user-perfs', () => {
     darkMode: 'auto',
     themeHue: 300,
     provider: null,
-    model: models.find(m => m.name === 'gpt-4.1'),
-    systemProvider: null,
-    systemModel: models.find(m => m.name === 'gpt-4o-mini'),
+    model: models.find(m => m.name === 'gpt-4.1') || { name: 'gpt-4.1', inputTypes: { user: [], assistant: [], tool: [] } },
+    systemModel: models.find(m => m.name === 'gpt-4o-mini') || { name: 'gpt-4o-mini', inputTypes: { user: [], assistant: [], tool: [] } },
     userAvatar: {
       type: 'text',
       text: 'U',
