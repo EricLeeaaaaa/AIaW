@@ -165,6 +165,7 @@
             @edit="edit(index)"
             @regenerate="regenerate(index)"
             @delete="deleteBranch(index)"
+            @delete-message="deleteMessage(index)"
             @quote="quote"
             @extract-artifact="extractArtifact(messageMap[i], ...$event)"
             @rendered="messageMap[i].generatingSession && lockBottom()"
@@ -572,6 +573,73 @@ async function deleteBranch(index) {
     })
     db.dialogs.update(props.id, { msgTree })
   })
+}
+
+async function deleteMessage(index) {
+  const messageId = chain.value[index]
+  const parentId = chain.value[index - 1]
+  const message = messageMap.value[messageId]
+
+  const itemIds = message.contents.flatMap(c => {
+    if (c.type === 'user-message') return c.items
+    else if (c.type === 'assistant-tool') return c.result || []
+    else return []
+  })
+
+  try {
+    await db.transaction('rw', db.dialogs, db.messages, db.items, async () => {
+      await db.messages.delete(messageId)
+      itemIds.forEach(id => {
+        let { references } = itemMap.value[id]
+        references--
+        references === 0 ? db.items.delete(id) : db.items.update(id, { references })
+      })
+
+      const d = await db.dialogs.get(props.id)
+      const msgTree = { ...toRaw(d.msgTree) }
+      const children = msgTree[parentId]
+      const messageIndex = children.indexOf(messageId)
+
+      if (message.type === 'user' && msgTree[messageId]?.length > 0) {
+        // If deleting a user message with children, move children to parent
+        msgTree[parentId] = [
+          ...children.slice(0, messageIndex),
+          ...msgTree[messageId],
+          ...children.slice(messageIndex + 1)
+        ]
+      } else {
+        // If deleting a message without children or an assistant message, just remove it
+        msgTree[parentId] = children.filter(id => id !== messageId)
+      }
+      delete msgTree[messageId]
+
+      await db.dialogs.update(props.id, { msgTree })
+    })
+
+    await nextTick() // Ensure DOM is updated after DB transaction
+    updateChain(dialog.value.msgRoute) // Re-evaluate chain after deletion
+
+    const lastMessageId = chain.value.at(-1)
+    if (!messageMap.value[lastMessageId] || messageMap.value[lastMessageId].status !== 'inputing') {
+      const target = chain.value.at(-2) || '$root' // If only one message left, target is $root
+      await appendMessage(target, {
+        type: 'user',
+        contents: [{
+          type: 'user-message',
+          text: '',
+          items: []
+        }],
+        status: 'inputing'
+      })
+    }
+    focusInput()
+  } catch (error) {
+    console.error('Failed to delete message:', error)
+    $q.notify({
+      message: t('dialogView.errors.deleteMessageFailed'),
+      color: 'negative'
+    })
+  }
 }
 
 async function appendMessage(target, info: Partial<Message>, insert = false) {

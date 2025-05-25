@@ -284,6 +284,11 @@
                   :label="$t('messageItem.moreInfo')"
                   @click="moreInfo"
                 />
+                <menu-item
+                  icon="sym_o_delete"
+                  :label="$t('messageItem.deleteMessage')"
+                  @click="deleteMessage"
+                />
               </q-list>
             </q-menu>
           </q-btn>
@@ -371,6 +376,7 @@ const emit = defineEmits<{
   'extract-artifact': [[string, RegExp | string, ConvertArtifactOptions]],
   rendered: []
   delete: []
+  'delete-message': []
 }>()
 
 watchEffect(async () => {
@@ -512,6 +518,22 @@ function deleteBranch() {
     ...dialogOptions
   }).onOk(() => {
     emit('delete')
+  })
+}
+
+function deleteMessage() {
+  $q.dialog({
+    title: t('messageItem.deleteMessage'),
+    message: t('messageItem.deleteMessageConfirm'),
+    cancel: true,
+    ok: {
+      label: t('messageItem.delete'),
+      color: 'err',
+      flat: true
+    },
+    ...dialogOptions
+  }).onOk(() => {
+    emit('delete-message')
   })
 }
 

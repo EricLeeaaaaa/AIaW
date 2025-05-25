@@ -172,7 +172,9 @@ export default {
     reasoningContent: 'Reasoning Content',
     deleteBranch: 'Delete Branch',
     deleteBranchMessage: 'Are you sure you want to delete this message branch? This message and all subsequent messages will be deleted.',
-    delete: 'Delete'
+    delete: 'Delete',
+    deleteMessage: 'Delete Message',
+    deleteMessageConfirm: 'Are you sure you want to delete this message?'
   },
   parseFilesDialog: {
     parseFiles: 'Parse Files',

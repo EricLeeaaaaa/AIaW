@@ -143,7 +143,8 @@ export default {
       configModel: 'Please configure a provider, model, or log in',
       loadPluginList: 'Failed to load plugin list',
       genTitle: 'Failed to summarize conversation, please check system assistant settings',
-      insufficientQuota: 'Insufficient model service quota'
+      insufficientQuota: 'Insufficient model service quota',
+      deleteMessageFailed: 'Failed to delete message'
     },
     enabledPlugins: 'Enabled Plugins',
     messageTokens: 'Last Message Token Consumption',

@@ -172,7 +172,9 @@ export default {
     reasoningContent: '思考内容',
     deleteBranch: '删除分支',
     deleteBranchMessage: '确定要删除此消息分支吗？此条消息和所属的后续消息将会被删除。',
-    delete: '删除'
+    delete: '删除',
+    deleteMessage: '删除消息',
+    deleteMessageConfirm: '确定要删除此消息吗？'
   },
   parseFilesDialog: {
     parseFiles: '解析文件',
