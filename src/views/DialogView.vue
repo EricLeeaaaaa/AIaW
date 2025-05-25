@@ -600,8 +600,8 @@ async function deleteMessage(index) {
       const children = msgTree[parentId]
       const messageIndex = children.indexOf(messageId)
 
-      if (message.type === 'user' && msgTree[messageId]?.length > 0) {
-        // If deleting a user message with children, move children to parent
+      if (msgTree[messageId]?.length > 0) {
+        // If deleting a message with children, move children to parent
         msgTree[parentId] = [
           ...children.slice(0, messageIndex),
           ...msgTree[messageId],
