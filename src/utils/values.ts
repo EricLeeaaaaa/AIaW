@@ -117,7 +117,14 @@ const ProviderTypes: ProviderType[] = [
       baseURL: String({ title: t('values.apiAddress'), description: t('values.defaultGoogleAddress'), default: OfficialBaseURLs.google })
     }),
     initialSettings: {},
-    constructor: createGoogleGenerativeAI
+    constructor: createGoogleGenerativeAI,
+    getModelList: async (settings) => {
+      const baseURL = settings.baseURL || OfficialBaseURLs.google
+      const url = settings.apiKey ? `${baseURL}/models?key=${settings.apiKey}` : `${baseURL}/models`
+      const resp = await fetch(url)
+      const { models } = await resp.json()
+      return models.map(m => m.name)
+    }
   },
   {
     name: 'openrouter',
@@ -143,7 +150,17 @@ const ProviderTypes: ProviderType[] = [
     avatar: { type: 'svg', name: 'deepseek-c' },
     settings: Object(commonSettings),
     initialSettings: {},
-    constructor: createDeepSeek
+    constructor: createDeepSeek,
+    getModelList: async (settings) => {
+      const baseURL = settings.baseURL || OfficialBaseURLs.openai
+      const resp = await fetch(`${baseURL}/models`, {
+        headers: settings.apiKey ? {
+          Authorization: `Bearer ${settings.apiKey}`
+        } : {}
+      })
+      const { data } = await resp.json()
+      return data.map(m => m.id)
+    }
   },
   {
     name: 'mistral',
@@ -151,7 +168,17 @@ const ProviderTypes: ProviderType[] = [
     avatar: { type: 'svg', name: 'mistral-c' },
     settings: Object(commonSettings),
     initialSettings: {},
-    constructor: createMistral
+    constructor: createMistral,
+    getModelList: async (settings) => {
+      const baseURL = settings.baseURL || OfficialBaseURLs.openai
+      const resp = await fetch(`${baseURL}/models`, {
+        headers: settings.apiKey ? {
+          Authorization: `Bearer ${settings.apiKey}`
+        } : {}
+      })
+      const { data } = await resp.json()
+      return data.map(m => m.id)
+    }
   },
   {
     name: 'xai',
@@ -159,7 +186,17 @@ const ProviderTypes: ProviderType[] = [
     avatar: { type: 'svg', name: 'grok' },
     settings: Object(commonSettings),
     initialSettings: {},
-    constructor: createXai
+    constructor: createXai,
+    getModelList: async (settings) => {
+      const baseURL = settings.baseURL || OfficialBaseURLs.openai
+      const resp = await fetch(`${baseURL}/models`, {
+        headers: settings.apiKey ? {
+          Authorization: `Bearer ${settings.apiKey}`
+        } : {}
+      })
+      const { data } = await resp.json()
+      return data.map(m => m.id)
+    }
   },
   {
     name: 'togetherai',
@@ -167,7 +204,17 @@ const ProviderTypes: ProviderType[] = [
     avatar: { type: 'svg', name: 'togetherai-c' },
     settings: Object(commonSettings),
     initialSettings: {},
-    constructor: createTogetherAI
+    constructor: createTogetherAI,
+    getModelList: async (settings) => {
+      const baseURL = settings.baseURL || OfficialBaseURLs.openai
+      const resp = await fetch(`${baseURL}/models`, {
+        headers: settings.apiKey ? {
+          Authorization: `Bearer ${settings.apiKey}`
+        } : {}
+      })
+      const { data } = await resp.json()
+      return data.map(m => m.id)
+    }
   },
   {
     name: 'cohere',
@@ -175,7 +222,17 @@ const ProviderTypes: ProviderType[] = [
     avatar: { type: 'svg', name: 'cohere-c' },
     settings: Object(commonSettings),
     initialSettings: {},
-    constructor: createCohere
+    constructor: createCohere,
+    getModelList: async (settings) => {
+      const baseURL = settings.baseURL || OfficialBaseURLs.openai
+      const resp = await fetch(`${baseURL}/models`, {
+        headers: settings.apiKey ? {
+          Authorization: `Bearer ${settings.apiKey}`
+        } : {}
+      })
+      const { data } = await resp.json()
+      return data.map(m => m.id)
+    }
   },
   {
     name: 'groq',
@@ -183,7 +240,17 @@ const ProviderTypes: ProviderType[] = [
     avatar: { type: 'svg', name: 'groq' },
     settings: Object(commonSettings),
     initialSettings: {},
-    constructor: createGroq
+    constructor: createGroq,
+    getModelList: async (settings) => {
+      const baseURL = settings.baseURL || OfficialBaseURLs.openai
+      const resp = await fetch(`${baseURL}/models`, {
+        headers: settings.apiKey ? {
+          Authorization: `Bearer ${settings.apiKey}`
+        } : {}
+      })
+      const { data } = await resp.json()
+      return data.map(m => m.id)
+    }
   },
   {
     name: 'ollama',
@@ -193,7 +260,17 @@ const ProviderTypes: ProviderType[] = [
       baseURL: String({ title: t('values.apiAddress'), default: OfficialBaseURLs.ollama })
     }),
     initialSettings: {},
-    constructor: createOllama
+    constructor: createOllama,
+    getModelList: async (settings) => {
+      const baseURL = settings.baseURL || OfficialBaseURLs.ollama
+      const resp = await fetch(`${baseURL}/tags`, {
+        headers: settings.apiKey ? {
+          Authorization: `Bearer ${settings.apiKey}`
+        } : {}
+      })
+      const { models } = await resp.json()
+      return models.map(m => m.name)
+    }
   }
 ]
 
