@@ -138,29 +138,52 @@ const filterList = computed(() =>
 )
 
 const $q = useQuasar()
-const loading = ref(false)
 const { locale } = useI18n()
-function load() {
+const loading = ref(false)
+async function load() {
   loading.value = true
-  fetch(`/json/assistants.${locale.value}.json`)
-    .then(res => res.json())
-    .then(data => {
-      list.push(...data)
-    }).catch(err => {
-      console.error(err)
-      $q.notify({
-        message: t('assistantsMarket.loadError'),
-        color: 'err-c',
-        textColor: 'on-err-c',
-        actions: [{
-          label: t('assistantsMarket.retry'),
-          color: 'on-sur',
-          handler: load
-        }]
-      })
-    }).finally(() => {
-      loading.value = false
+  try {
+    const res = await fetch('https://registry.npmmirror.com/@lobehub/agents-index/v1/files/public')
+    if (!res.ok) throw new Error('Network response failed with status ' + res.status)
+    const indexData = await res.json()
+
+    const agentsPromises = indexData.agents.map(async (agentIndex) => {
+      const detailRes = await fetch(`https://registry.npmmirror.com/@lobehub/agents-index/v1/files/public/${agentIndex.identifier}.${locale.value}.json`)
+      if (!detailRes.ok) throw new Error(`Failed to fetch details for ${agentIndex.identifier} with status ` + detailRes.status)
+      const agentDetail = await detailRes.json()
+      return {
+        name: agentDetail.meta.title,
+        avatar: {
+          type: 'text',
+          text: agentDetail.meta.avatar
+        },
+        description: agentDetail.meta.description,
+        author: agentDetail.author,
+        homepage: agentDetail.homepage,
+        prompt: agentDetail.config.systemRole,
+        promptVars: [],
+        promptTemplate: AssistantDefaultPrompt,
+        model: null,
+        modelSettings: { ...defaultModelSettings }
+      }
     })
+    const agents = await Promise.all(agentsPromises)
+    list.push(...agents)
+  } catch (err) {
+    console.error(err)
+    $q.notify({
+      message: t('assistantsMarket.loadError'),
+      color: 'err-c',
+      textColor: 'on-err-c',
+      actions: [{
+        label: t('assistantsMarket.retry'),
+        color: 'on-sur',
+        handler: load
+      }]
+    })
+  } finally {
+    loading.value = false
+  }
 }
 load()
 
@@ -230,4 +253,5 @@ async function clipboardImport() {
     })
   }
 }
+
 </script>
