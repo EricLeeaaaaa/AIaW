@@ -110,7 +110,8 @@
             tip-key="configure-common-models"
             rd-0
           >
-            {{ $t('dialogView.modelsConfigGuide1') }}<router-link
+            {{ $t('dialogView.modelsConfigGuide1') }}
+            <router-link
               to="/settings"
               pri-link
             >
@@ -180,7 +181,7 @@
         pos-relative
       >
         <div
-          v-if="inputMessageContent?.items.length"
+          v-if="inputMessageContent?.items?.length"
           pos-absolute
           z-3
           top-0
@@ -318,6 +319,7 @@
             min-h="2.7em"
           />
           <add-info-btn
+            v-if="assistant"
             :plugins="activePlugins"
             :assistant-plugins="assistant.plugins"
             @add="addInputItems"
@@ -368,7 +370,8 @@
             :label="$t('dialogView.send')"
             @click="send"
             @abort="abortController?.abort()"
-            :loading="!!messageMap[chain.at(-2)]?.generatingSession"
+            :loading="generating"
+            :disable="inputEmpty && !generating"
             ml-4
             min-h="40px"
           />
@@ -397,7 +400,7 @@
           max-h-50vh
           of-y-auto
           :model-value="inputText"
-          @update:model-value="inputMessageContent && updateInputText($event)"
+          @update:model-value="inputMessageContent && updateInputText($event ?? '')"
           outlined
           autogrow
           clearable
@@ -419,7 +422,7 @@ import { useLiveQueryWithDeps } from 'src/composables/live-query'
 import { almostEqual, displayLength, genId, isPlatformEnabled, isTextFile, JSONEqual, mimeTypeMatch, pageFhStyle, textBeginning, wrapCode, wrapQuote } from 'src/utils/functions'
 import { useAssistantsStore } from 'src/stores/assistants'
 import { streamText, CoreMessage, generateText, tool, jsonSchema, StreamTextResult, GenerateTextResult } from 'ai'
-import { throttle, useQuasar } from 'quasar'
+import { copyToClipboard, throttle, useQuasar } from 'quasar'
 import AssistantItem from 'src/components/AssistantItem.vue'
 import { DialogContent, ExtractArtifactPrompt, ExtractArtifactResult, GenDialogTitle, NameArtifactPrompt, PluginsPrompt } from 'src/utils/templates'
 import sessions from 'src/utils/sessions'
@@ -487,7 +490,10 @@ const workspace: Ref<Workspace> = inject('workspace')
 const assistants = computed(() => assistantsStore.assistants.filter(
   a => [workspace.value.id, '$root'].includes(a.workspaceId)
 ))
-const assistant = computed(() => ({ ...assistantsStore.assistants.find(a => a.id === dialog.value?.assistantId) })) // force trigger updates
+const assistant = computed(() => {
+  const val = assistantsStore.assistants.find(a => a.id === dialog.value?.assistantId)
+  return val && { ...val } // force trigger updates
+})
 provide('dialog', dialog)
 
 const chain = computed<string[]>(() => liveData.value.dialog ? getChain('$root', liveData.value.dialog.msgRoute)[0] : [])
@@ -684,7 +690,8 @@ const itemMap = computed<Record<string, StoredItem>>(() => {
 })
 provide('messageMap', messageMap)
 provide('itemMap', itemMap)
-const inputEmpty = computed(() => !inputMessageContent.value?.text && !inputMessageContent.value?.items.length)
+const generating = computed(() => !!messageMap.value[chain.value.at(-2)]?.generatingSession)
+const inputEmpty = computed(() => !inputMessageContent.value?.text && !inputMessageContent.value?.items?.length)
 
 const inputText = ref('')
 const pendingTexts = []
@@ -960,6 +967,7 @@ const sdkModel = computed(() => getSdkModel(assistant.value?.provider, model.val
 const $q = useQuasar()
 const { data } = useUserDataStore()
 async function send() {
+  if (inputEmpty.value) return
   if (!assistant.value) {
     $q.notify({ message: t('dialogView.errors.setAssistant'), color: 'negative' })
     return
@@ -983,18 +991,14 @@ async function send() {
     return
   }
   showVars.value = false
-  if (inputEmpty.value) {
-    await stream(chain.value.at(-2), true)
-  } else {
-    const target = chain.value.at(-1)
-    await db.messages.update(target, { status: 'default' })
-    until(chain).changed().then(() => {
-      nextTick().then(() => {
-        scroll('bottom')
-      })
+  const target = chain.value.at(-1)
+  await db.messages.update(target, { status: 'default' })
+  until(chain).changed().then(() => {
+    nextTick().then(() => {
+      scroll('bottom')
     })
-    await stream(target, false)
-  }
+  })
+  await stream(target, false)
   perfs.autoGenTitle && chain.value.length === 4 && genTitle()
 }
 
@@ -1232,7 +1236,7 @@ async function genTitle() {
   }
 }
 async function copyContent() {
-  await navigator.clipboard.writeText(await engine.parseAndRender(DialogContent, {
+  await copyToClipboard(await engine.parseAndRender(DialogContent, {
     contents: getDialogContents(),
     title: dialog.value.name
   }))

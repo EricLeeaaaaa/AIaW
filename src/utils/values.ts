@@ -120,10 +120,13 @@ const ProviderTypes: ProviderType[] = [
     constructor: createGoogleGenerativeAI,
     getModelList: async (settings) => {
       const baseURL = settings.baseURL || OfficialBaseURLs.google
-      const url = settings.apiKey ? `${baseURL}/models?key=${settings.apiKey}` : `${baseURL}/models`
-      const resp = await fetch(url)
+      const resp = await fetch(`${baseURL}/models`, {
+        headers: {
+          'x-goog-api-key': settings.apiKey
+        }
+      })
       const { models } = await resp.json()
-      return models.map(m => m.name)
+      return models.filter(m => m.supportedGenerationMethods.includes('generateContent')).map(m => m.name.split('/').at(-1))
     }
   },
   {
@@ -281,7 +284,7 @@ const InputTypes = {
   claudePdf: { user: ['image/*', 'application/pdf'], assistant: [], tool: ['image/*'] },
   audioPreview: { user: ['audio/*'], assistant: [], tool: [] },
   default: { user: ['image/*'], assistant: [], tool: [] },
-  gemini2: { user: ['image/*', 'audio/*'], assistant: [], tool: [] }
+  gemini2: { user: ['image/*', 'audio/*', 'application/pdf'], assistant: [], tool: [] }
 }
 const models: Model[] = [
   { name: 'o4-mini', inputTypes: InputTypes.commonVision },
@@ -322,10 +325,14 @@ const models: Model[] = [
   { name: 'claude-3-opus-20240229', inputTypes: InputTypes.claudeVision },
   { name: 'claude-3-sonnet-20240229', inputTypes: InputTypes.claudeVision },
   { name: 'claude-3-haiku-20240307', inputTypes: InputTypes.claudeVision },
+  { name: 'gemini-2.5-pro', inputTypes: InputTypes.gemini2 },
+  { name: 'gemini-2.5-pro-preview-06-05', inputTypes: InputTypes.gemini2 },
   { name: 'gemini-2.5-pro-preview-05-06', inputTypes: InputTypes.gemini2 },
   { name: 'gemini-2.5-pro-preview-03-25', inputTypes: InputTypes.gemini2 },
+  { name: 'gemini-2.5-flash', inputTypes: InputTypes.gemini2 },
   { name: 'gemini-2.5-flash-preview-05-20', inputTypes: InputTypes.gemini2 },
   { name: 'gemini-2.5-flash-preview-04-17', inputTypes: InputTypes.gemini2 },
+  { name: 'gemini-2.5-flash-lite-preview-06-17', inputTypes: InputTypes.gemini2 },
   { name: 'gemini-2.0-flash', inputTypes: InputTypes.gemini2 },
   { name: 'gemini-2.0-flash-exp', inputTypes: InputTypes.gemini2 },
   { name: 'gemini-2.0-flash-thinking-exp', inputTypes: InputTypes.commonVision },
@@ -349,7 +356,8 @@ const models: Model[] = [
   { name: 'grok-3-mini', inputTypes: InputTypes.textOnly },
   { name: 'grok-3-mini-beta', inputTypes: InputTypes.textOnly },
   { name: 'grok-3-mini-fast', inputTypes: InputTypes.textOnly },
-  { name: 'grok-3-mini-fast-beta', inputTypes: InputTypes.textOnly }
+  { name: 'grok-3-mini-fast-beta', inputTypes: InputTypes.textOnly },
+  { name: 'grok-4', inputTypes: InputTypes.commonVision }
 ]
 const modelOptions = models.map(m => m.name)
 const dialogOptions = {

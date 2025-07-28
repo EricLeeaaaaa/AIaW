@@ -67,8 +67,8 @@ export const useUserPerfsStore = defineStore('user-perfs', () => {
       'o4-mini',
       'claude-sonnet-4-20250514',
       'claude-opus-4-20250514',
-      'gemini-1.5-pro',
-      'gemini-2.0-flash',
+      'gemini-2.5-pro',
+      'gemini-2.5-flash',
       'deepseek-chat',
       'deepseek-reasoner'
     ],
